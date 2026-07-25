@@ -3,7 +3,13 @@
 <head>
 <title>Counter App</title>
 
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 <style>
+
+html, body {
+  touch-action: manipulation;
+}
 
 body {
   font-family: Arial;
@@ -13,7 +19,7 @@ body {
 
 #settings {
   font-size: 28px;
-  margin-bottom: 20px;
+  margin-top: 30px;
 }
 
 input, button {
@@ -54,6 +60,9 @@ input, button {
 </head>
 
 <body>
+
+
+<div id="counters"></div>
 
 
 <div id="settings">
@@ -109,10 +118,6 @@ Global Reset
 
 
 </div>
-
-
-
-<div id="counters"></div>
 
 
 
@@ -381,8 +386,6 @@ function change(index,amount){
 
 function startHold(index,amount){
 
-
-  // first change immediately
 
   change(index,amount);
 
