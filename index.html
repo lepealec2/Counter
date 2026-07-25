@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Counter App</title>
+
+<style>
+
+body {
+  font-family: Arial;
+  text-align: center;
+  margin: 20px;
+}
+
+#settings {
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+input, button {
+  font-size: 28px;
+  margin: 5px;
+}
+
+#counters {
+  display: grid;
+  grid-template-columns: repeat(2, 300px);
+  justify-content: center;
+  gap: 20px;
+}
+
+.counter {
+  padding: 20px;
+  border: 3px solid black;
+}
+
+.value {
+  font-size: 80px;
+  margin: 20px;
+}
+
+.counter button {
+  font-size: 30px;
+  margin: 10px 20px;
+}
+
+.counterName {
+  font-size: 32px;
+  width: 90%;
+  text-align: center;
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<div id="settings">
+
+
+<button id="settingsButton" onclick="toggleSettings()">
+Hide Settings
+</button>
+
+
+<div id="settingsContent">
+
+
+<br>
+
+
+Number of Counters:
+
+<input 
+id="counterCount"
+type="number"
+value="4"
+min="1"
+max="20"
+onchange="changeCount()"
+>
+
+
+<br>
+
+
+Global Reset Value:
+
+<input
+id="resetValue"
+type="number"
+value="20"
+>
+
+
+<br><br>
+
+
+<div id="counterSettings"></div>
+
+
+<button onclick="globalReset()">
+Global Reset
+</button>
+
+
+</div>
+
+
+</div>
+
+
+
+<div id="counters"></div>
+
+
+
+<script>
+
+
+let counters = [];
+
+let settingsVisible = true;
+
+
+// Hold variables
+
+let holdTimer = null;
+
+let holdInterval = null;
+
+
+
+// Default counters
+
+for(let i = 0; i < 4; i++){
+
+  counters.push({
+
+    name: "Counter " + (i + 1),
+
+    value: 20,
+
+    color: "#ffffff"
+
+  });
+
+}
+
+
+
+// Hide/show settings
+
+function toggleSettings(){
+
+  settingsVisible = !settingsVisible;
+
+
+  document.getElementById("settingsContent").style.display =
+    settingsVisible ? "block" : "none";
+
+
+  document.getElementById("settingsButton").innerText =
+    settingsVisible ? "Hide Settings" : "Show Settings";
+
+}
+
+
+
+// Create settings controls
+
+function createSettings(){
+
+  let area = document.getElementById("counterSettings");
+
+  area.innerHTML = "";
+
+
+  counters.forEach((c,index)=>{
+
+
+    area.innerHTML += `
+
+      <input
+        value="${c.name}"
+        onchange="changeName(${index},this.value)"
+      >
+
+      <input
+        type="color"
+        value="${c.color}"
+        onchange="changeColor(${index},this.value)"
+      >
+
+      <br>
+
+    `;
+
+
+  });
+
+}
+
+
+
+// Change number of counters
+
+function changeCount(){
+
+  let amount =
+    Number(document.getElementById("counterCount").value);
+
+
+
+  while(counters.length < amount){
+
+    counters.push({
+
+      name:"Counter " + (counters.length + 1),
+
+      value:Number(
+        document.getElementById("resetValue").value
+      ),
+
+      color:"#ffffff"
+
+    });
+
+  }
+
+
+
+  while(counters.length > amount){
+
+    counters.pop();
+
+  }
+
+
+
+  createSettings();
+
+  render();
+
+}
+
+
+
+// Change name
+
+function changeName(index,name){
+
+  counters[index].name = name;
+
+  render();
+
+}
+
+
+
+// Change color
+
+function changeColor(index,color){
+
+  counters[index].color = color;
+
+  render();
+
+}
+
+
+
+// Render counters
+
+function render(){
+
+  let area = document.getElementById("counters");
+
+  area.innerHTML = "";
+
+
+
+  counters.forEach((c,index)=>{
+
+
+    let div = document.createElement("div");
+
+
+    div.className = "counter";
+
+    div.style.background = c.color;
+
+
+
+    div.innerHTML = `
+
+
+    <div class="counterName">
+      ${c.name}
+    </div>
+
+
+    <div class="value">
+      ${c.value}
+    </div>
+
+
+
+    <button
+
+      onmousedown="startHold(${index},-1)"
+
+      onmouseup="stopHold()"
+
+      onmouseleave="stopHold()"
+
+      ontouchstart="startHold(${index},-1)"
+
+      ontouchend="stopHold()"
+
+    >
+      -
+    </button>
+
+
+
+    <button
+
+      onmousedown="startHold(${index},1)"
+
+      onmouseup="stopHold()"
+
+      onmouseleave="stopHold()"
+
+      ontouchstart="startHold(${index},1)"
+
+      ontouchend="stopHold()"
+
+    >
+      +
+    </button>
+
+
+
+    <br>
+
+
+
+    <button onclick="resetCounter(${index})">
+      Reset
+    </button>
+
+
+    `;
+
+
+    area.appendChild(div);
+
+
+  });
+
+
+}
+
+
+
+// Change counter
+
+function change(index,amount){
+
+  counters[index].value += amount;
+
+  render();
+
+}
+
+
+
+// Start holding button
+
+function startHold(index,amount){
+
+
+  // first change immediately
+
+  change(index,amount);
+
+
+
+  holdTimer = setTimeout(()=>{
+
+
+    holdInterval = setInterval(()=>{
+
+
+      counters[index].value += amount;
+
+
+      render();
+
+
+
+    },100);
+
+
+
+  },500);
+
+
+}
+
+
+
+// Stop holding
+
+function stopHold(){
+
+
+  clearTimeout(holdTimer);
+
+  clearInterval(holdInterval);
+
+
+}
+
+
+
+// Individual reset
+
+function resetCounter(index){
+
+  counters[index].value =
+    Number(document.getElementById("resetValue").value);
+
+
+  render();
+
+}
+
+
+
+// Global reset
+
+function globalReset(){
+
+  let value =
+    Number(document.getElementById("resetValue").value);
+
+
+
+  counters.forEach(c=>{
+
+    c.value = value;
+
+  });
+
+
+
+  render();
+
+}
+
+
+
+// Start
+
+createSettings();
+
+render();
+
+
+</script>
+
+
+</body>
+</html>
